@@ -1,0 +1,19 @@
+{
+    "region":           "ap-southeast-1",
+    "instance_type":    "t2.micro",
+    "ssh_username":     "ubuntu",
+
+    "volume_size_sda1":      "60",
+    "volume_type_sda1":      "standard",
+
+    "volume_size_sda2":      "40",
+    "volume_type_sda2":      "gp2",
+
+    "source_ami":       "ami-061eb2b23f9f8839c",
+    "vpc_id":           "vpc-04610142f98d18a41",
+    "subnet_id":        "subnet-047476ea21548e82a",
+
+    "ami_tag_name":             "Demo Packer",
+    "ami_tag_owner_alias":      "DevOps",
+    "ami_tag_technical_owner":  "msallehuddin.ukm@gmail.com"
+}

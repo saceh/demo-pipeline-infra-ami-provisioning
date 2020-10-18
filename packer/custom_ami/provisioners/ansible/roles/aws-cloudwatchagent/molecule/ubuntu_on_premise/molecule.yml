@@ -1,0 +1,35 @@
+---
+dependency:
+  name: galaxy
+  options:
+    role-file: requirements.yml
+    ignore-errors: false
+driver:
+  name: docker
+lint:
+  name: yamllint
+platforms:
+  - name: instance
+    image: solita/ubuntu-systemd:18.04
+    privileged: true
+    capabilities:
+      - SYS_ADMIN
+    volume_mounts:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    command: "/sbin/init"
+
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+    options:
+      x: ANSIBLE0013
+scenario:
+  name: ubuntu_on_premise
+verifier:
+  name: testinfra
+  options:
+    verbose: true
+  lint:
+    name: flake8
+    enabled: false

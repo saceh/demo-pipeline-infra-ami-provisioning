@@ -1,0 +1,53 @@
+---
+- name: Setup for Ubuntu
+  include_tasks: "ubuntu.yml"
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Setup for CentOS
+  include_tasks: "centos.yml"
+  when: ansible_distribution == 'CentOS'
+
+- name: Designate downlod directory
+  set_fact:
+    aws_cloudwatch_agent_download_directory: "/home/{{ aws_cloudwatch_agent_username }}/Downloads"
+  when: not aws_cloudwatch_agent_download_directory
+
+- name: Ensure directory to store downloaded CloudWatchAgent binary package exists
+  file:
+    path: "{{ aws_cloudwatch_agent_download_directory }}"
+    state: directory
+    owner: "{{ aws_cloudwatch_agent_username }}"
+    group: "{{ aws_cloudwatch_agent_username }}"
+
+- name: Stat AWS CloudWatchAgent downloaded file
+  stat:
+    path: "{{ downloaded_file }}"
+  register: stat_downloaded_file
+
+- name: Download CloudWatchAgent
+  get_url:
+    url: "{{ aws_cloudwatch_agent_download_url }}"
+    remote_src: true
+    dest: "{{ aws_cloudwatch_agent_download_directory }}"
+    owner: "{{ aws_cloudwatch_agent_username }}"
+    group: "{{ aws_cloudwatch_agent_username }}"
+  when: not stat_downloaded_file.stat.exists
+
+- name: Install the package via apt
+  apt:
+    deb: "{{ aws_cloudwatch_agent_download_directory }}/amazon-cloudwatch-agent.deb"
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Install the package via yum
+  yum:
+    name: "{{ aws_cloudwatch_agent_download_directory }}/amazon-cloudwatch-agent.rpm"
+  when: ansible_distribution == 'CentOS'
+
+- name: CloudWatchAgent configuration
+  template:
+    src: aws-cw-config.json
+    dest: /opt/aws/amazon-cloudwatch-agent/bin/config.json
+  register: aws_cloudwatch_agent_configuration
+  notify:
+    - Set the -s switch
+    - Start the CloudWatchAgent

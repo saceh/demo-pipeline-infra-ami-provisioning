@@ -1,0 +1,68 @@
+{
+  "variables": {
+    "aws_profile":        "{{env `AWS_PROFILE`}}",
+    "packer_ami_name":    "DEMO-PACKER-BAKEJOB-{{timestamp}}"
+  },
+  
+  "builders": [
+    {
+      "type":           "amazon-ebs",
+      "region":         "{{user `region`}}",
+      "profile":        "{{user `aws_profile`}}",
+
+      "ssh_username":   "{{user `ssh_username`}}",
+      "instance_type":  "{{user `instance_type`}}",
+      "ami_name":       "{{user `packer_ami_name`}}",
+
+      "source_ami":     "{{user `source_ami`}}",
+      "vpc_id":         "{{user `vpc_id`}}",
+      "subnet_id":      "{{user `subnet_id`}}",
+
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/sda1",
+          "volume_type": "{{user `volume_type_sda1`}}",
+          "volume_size": "{{user `volume_size_sda1`}}",
+          "encrypted": true,
+          "delete_on_termination": true
+        },
+        {
+          "device_name": "/dev/sda2",
+          "volume_type": "{{user `volume_type_sda2`}}",
+          "volume_size": "{{user `volume_size_sda2`}}",
+          "encrypted": true,
+          "delete_on_termination": true
+        }
+      ],
+      
+      "associate_public_ip_address": true,
+      "encrypt_boot": true,
+      
+      "tags": {
+        "Name":             "{{user `ami_tag_name` }}",
+        "Owner_Alias":      "{{user `ami_tag_owner_alias` }}",
+        "Technical_Owner":  "{{user `ami_tag_technical_owner` }}"
+      }
+    }
+  ],
+  
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "./provisioners/scripts/bootstrap.sh"
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "./provisioners/ansible/playbook.yml"
+    }
+  ],
+
+
+  "post-processors": [
+    {
+      "type": "manifest",
+      "output": "manifest.json",
+      "strip_path": true
+    }
+  ]
+}

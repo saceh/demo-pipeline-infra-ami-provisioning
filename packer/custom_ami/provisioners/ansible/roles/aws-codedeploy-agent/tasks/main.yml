@@ -1,0 +1,25 @@
+---
+# tasks file for aws-codedeploy-agent
+ - name: Install AWS CodeDeploy Common Packages
+   apt:
+     name: "{{ item }}"
+     state: latest
+     update_cache: yes
+   loop:
+     -  [ "wget" , "python" , "awscli" , "ruby" ]
+
+ - name: Download AWS CodeDeploy Agent file to tmp dir
+   get_url:
+     url: https://aws-codedeploy-ap-southeast-1.s3.amazonaws.com/latest/install
+     dest: /tmp/
+     mode: 0755
+
+ - name: Execute CodeDeploy Agent
+   shell: install auto
+   args:
+     chdir: /tmp/
+
+ - name: Start service AWS CodeDeploy Agent, if not started
+   service:
+     name: codedeploy-agent
+     state: started

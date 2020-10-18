@@ -1,0 +1,40 @@
+# image: atlassian/pipelines-awscli
+
+definitions:
+  steps:
+    - step: &packer-build
+        name: HashiCorp Packer Build Custom AMI
+        image: bootswithdefer/packer-ansible:latest
+        script:
+          - mkdir -p ~/.aws
+          # Setup AWS Profile
+          # Export Deloyment Variables
+          - export AWS_DEFAULT_PROFILE=demo
+          - export AMI_TAG_NAME=$BITBUCKET_REPO_SLUG
+          # Apply HashiCorp Packer
+          - cd packer/custom_ami/
+          - packer build -debug -var-file=variable_dev.json -var ami_tag_name=$AMI_TAG_NAME packer.json
+
+    - step: &infra-build
+        name: Common Code Deploy APP
+        image: hashicorp/terraform:0.12.8
+        #trigger: manual
+        script:
+          - mkdir -p ~/.aws
+          # Setup AWS Profile
+          - export AWS_DEFAULT_PROFILE=demo
+          # Get OpenSSH-Client: Enable Modules
+          # Export Deployment Variables
+          - export TF_KEY=$BITBUCKET_REPO_SLUG
+          - export TF_BUCKET=demo-trraform-state
+          # Apply HashiCorp Terraform
+          - cd terraform
+          - terraform init -backend-config="bucket=$TF_BUCKET" -backend-config="key=$TF_KEY/app.tfstate" -backend-config="profile=$AWS_DEFAULT_PROFILE"
+          - terraform validate -var awsprofile=$AWS_DEFAULT_PROFILE
+          - terraform plan -var awsprofile=$AWS_DEFAULT_PROFILE
+          - terraform apply -var awsprofile=$AWS_DEFAULT_PROFILE -auto-approve 
+
+pipelines:
+  default:
+    - step: *packer-build
+    - step: *infra-build

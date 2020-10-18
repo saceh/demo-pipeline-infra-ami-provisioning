@@ -1,0 +1,39 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    - aws_cloudwatch_agent_download_directory: /tmp/downloads/
+    - aws_cloudwatch_agent_username: root
+    - aws_cloudwatch_agent_mode: onPremise
+  pre_tasks:
+    - name: Install initscripts. AWS CloudWatchAgent uses service command.
+      yum:
+        name: initscripts
+    - name: fetch the AWS access key ID from local environment variable
+      set_fact:
+        aws_access_key_id: "{{ lookup('env', 'ANSIBLE_CW_MOL_TEST_AWS_KEY_ID') }}"
+    - name: fetch the AWS secret key from local environment variable
+      set_fact:
+        aws_secret_key: "{{ lookup('env', 'ANSIBLE_CW_MOL_TEST_AWS_SECRET_KEY') }}"
+    - name: fetch the AWS access key ID from travis environment variable
+      set_fact:
+        aws_access_key_id: "{{ lookup('env', 'access_key_id') }}"
+      when: not aws_access_key_id
+    - name: fetch the AWS access secret key from travis environment variable
+      set_fact:
+        aws_secret_key: "{{ lookup('env', 'secret_key') }}"
+      when: not aws_secret_key
+    - name: .aws directory
+      file:
+        path: /root/.aws/
+        state: directory
+    - name: configure AWS config file
+      copy:
+        src: aws-config
+        dest: /root/.aws/config
+    - name: configure AWS credentials
+      template:
+        src: aws-credentials
+        dest: /root/.aws/credentials
+  roles:
+    - role: aws-cloudwatchagent

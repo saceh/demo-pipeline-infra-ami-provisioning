@@ -1,0 +1,25 @@
+  - name: Demo Bake Job
+    hosts: all
+    #connection: local
+    #become: yes
+    #become_method: sudo
+
+    roles:
+    - role: aws-codedeploy-agent
+
+    tasks:
+    - name: Install Prerequisite Packages
+      apt:
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - python
+          - rpm
+          - ruby
+          - awscli 
+          - unzip
+    
+    roles:
+    - aws-codedeploy-agent
+    - aws-cloudwatchagent  
+        

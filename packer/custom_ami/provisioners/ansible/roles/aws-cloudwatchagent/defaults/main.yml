@@ -1,0 +1,9 @@
+---
+aws_cloudwatch_agent_username: ""
+aws_cloudwatch_agent_download_url: ""
+aws_cloudwatch_agent_download_directory: ""
+aws_cloudwatch_agent_config_json: '{}'
+aws_cloudwatch_agent_mode: ec2
+
+aws_cloudwatch_agent_start_switch_value: ""
+aws_cloudwatch_agent_force_restart: false

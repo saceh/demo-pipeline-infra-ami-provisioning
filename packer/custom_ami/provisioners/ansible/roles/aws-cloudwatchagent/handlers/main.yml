@@ -1,0 +1,18 @@
+---
+# handlers file for ansible-role-aws-cloudwatchagent
+- name: creates start CloudWatchAgent
+  file:
+    path: /root/.bngsudheer.aws-cloudwatchagent-creates
+    state: touch
+
+- name: Set the -s switch
+  set_fact:
+    aws_cloudwatch_agent_start_switch_value: "-s"
+
+- name: Start the CloudWatchAgent
+  command: >-
+    /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl
+    -a fetch-config
+    -m {{ aws_cloudwatch_agent_mode }}
+    -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json
+    {{ aws_cloudwatch_agent_start_switch_value }}

@@ -1,0 +1,13 @@
+---
+- name: Determine downlod URL for CentOS
+  set_fact:
+    aws_cloudwatch_agent_download_url: https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm
+
+- name: Determine user
+  set_fact:
+    aws_cloudwatch_agent_username: centos
+  when: not aws_cloudwatch_agent_username
+
+- name: Set full path of downloaded file
+  set_fact:
+    downloaded_file: "{{ aws_cloudwatch_agent_download_directory }}/amazon-cloudwatch-agent.rpm"
